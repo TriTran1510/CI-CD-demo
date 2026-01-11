@@ -3,6 +3,8 @@ name: Docker image CI
 on:
   push:
     branches: [main]
+    tags:
+      - 'v1.0.0'
 
 jobs:
   build-and-push:
@@ -15,6 +17,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Get version
+        id: version
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION=latest
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v2
         with:
@@ -24,8 +36,15 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/node_js_server:latest .
-          docker push ghcr.io/${{ github.repository_owner }}/node_js_server:latest
+          IMAGE_NAME=ghcr.io/${{ github.repository_owner }}/node_js_server
+          COMMIT_SHA=${{ github.sha }}
+          
+          # Build với 2 tags: latest và commit SHA
+          docker build -t $IMAGE_NAME:latest -t $IMAGE_NAME:${COMMIT_SHA:0:7} .
+          
+          # Push cả 2 tags
+          docker push $IMAGE_NAME:latest
+          docker push $IMAGE_NAME:${COMMIT_SHA:0:7}
       
       # - name: Trigger Render Deploy
       #   run: |
