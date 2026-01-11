@@ -27,6 +27,6 @@ jobs:
           docker build -t ghcr.io/${{ github.repository_owner }}/node_js_server:latest .
           docker push ghcr.io/${{ github.repository_owner }}/node_js_server:latest
       
-      - name: Trigger Render Deploy
-        run: |
-          curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
+      # - name: Trigger Render Deploy
+      #   run: |
+      #     curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK }}
